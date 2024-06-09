@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tambah Kategori</title>
+    <!-- Include Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1>Tambah Kategori</h1>
+      <form id="formTambahKategori">
+        <div class="form-group">
+          <label for="namaKategori">Nama Kategori:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="namaKategori"
+            name="namaKategori"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Tambah</button>
+        <a href="./admin_kategori.html" class="btn btn-secondary">Cancel</a>
+      </form>
+    </div>
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- Include JavaScript for handling form submission -->
+    <script>
+      $(document).ready(function () {
+        // Form submission
+        $("#formTambahKategori").submit(function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          // Get the value of the input field
+          var namaKategori = $("#namaKategori").val();
+
+          // Create an object with the data to send
+          var data = {
+            name: namaKategori,
+          };
+
+          // AJAX request to add new category
+          $.ajax({
+            url: "http://127.0.0.1:8000/api/admin/categories", // Ganti dengan URL endpoint yang benar
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            dataType: "json",
+            headers: {
+              Authorization: "58|4cNrGWxVhnTHEYLyk273hPoolDjxP6H74ZMa7wdp1c834b46", // Add your API token here
+            },
+            success: function (response) {
+              if (response.success) {
+                // Clear the input field after successfully adding category
+                $("#namaKategori").val("");
+
+                // Show success message
+                alert(response.message);
+              } else {
+                // Show error message
+                alert("Terjadi kesalahan: " + response.message);
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("Error:", status, error);
+              console.log("Response Text:", xhr.responseText);
+              console.log("Status Code:", xhr.status);
+
+              // Show error message or handle errors
+              alert("Terjadi kesalahan. Silakan coba lagi. " + "Status: " + status + ", Error: " + error);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

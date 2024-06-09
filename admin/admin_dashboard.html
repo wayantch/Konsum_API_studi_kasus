@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            background: #343a40;
+            color: #fff;
+            padding-top: 20px;
+        }
+        #sidebar .nav-link {
+            color: #fff;
+        }
+        #content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <h3 class="text-center">Admin Panel</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="admin_dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_kategori.html">Kategori</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_buku.html">Buku</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="logout" onclick="return confirm('yakin?')">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Content -->
+    <div id="content">
+        <h1>Welcome to Admin Dashboard</h1>
+        <p>Selamat datang</p>
+    </div>
+
+    <!-- Include jQuery and Bootstrap JS -->
+    <script>
+        $(document).ready(function() {
+    // Logout request
+    $('#logout').click(function() {
+        // Remove token from localStorage
+        localStorage.removeItem('token');
+        
+        // Redirect user to login page
+        window.location.href = '/login.html';
+    });
+});
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>

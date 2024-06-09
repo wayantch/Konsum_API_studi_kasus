@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            background: #343a40;
+            color: #fff;
+            padding-top: 20px;
+        }
+        #sidebar .nav-link {
+            color: #fff;
+        }
+        #content {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <h3 class="text-center">Admin Panel</h3>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="admin_dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_kategori.html">Kategori</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="admin_buku.html">Buku</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="logout" onclick="return confirm('yakin?')">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Content -->
+    <div id="content">
+        <div class="table-responsive">
+            <table class="table" id="bukuTable">
+                <h2 class="mt-2">Buku</h2>
+                <a href="/admin/tambah_buku.html" class="btn btn-primary mb-2">Tambah</a>
+                <thead class="text-center">
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Buku</th>
+                        <th>Penulis</th>
+                        <th>Tanggal Publikasi</th>
+                        <th>Gambar</th>
+                        <th>Kategori</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    <!-- Data buku akan dimasukkan di sini oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Include jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+    // Logout request
+    $('#logout').click(function() {
+        // Remove token from localStorage
+        localStorage.removeItem('token');
+        
+        // Redirect user to login page
+        window.location.href = '/login.html';
+    });
+
+    // Fetch data request
+    var token = localStorage.getItem('token');
+    if (!token) {
+        alert('Anda harus login terlebih dahulu!');
+        window.location.href = '/login.html';
+        return;
+    }
+
+    // Load books data
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/admin/books',
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        success: function(response) {
+            $('#bukuTable tbody').empty();
+            if (response.success) {
+                $.each(response.data, function(index, buku) {
+                    var row = '<tr>' +
+                                '<td>' + (index + 1) + '</td>' +
+                                '<td>' + buku.title + '</td>' +
+                                '<td>' + buku.author + '</td>' +
+                                '<td>' + buku.publication_add + '</td>' +
+                                '<td>' + '<img src="http://127.0.0.1:8000/storage/' + buku.image + '" alt="Gambar buku" style="max-width:100px; max-height:100px;">' + '</td>' +
+                                '<td>' + buku.category_id + '</td>' +
+                                '<td>' +
+                                    '<a href="edit_buku.html?id=' + buku.id + '" class="btn btn-success">Edit</a>' +
+                                    '<button class="btn btn-danger delete-btn" data-id="' + buku.id + '">Del</button>' +
+                                '</td>' +
+                            '</tr>';
+                    $('#bukuTable tbody').append(row);
+                });
+
+                // Add event listener to delete buttons
+                $('.delete-btn').click(function() {
+                    var id = $(this).data('id');
+                    if (confirm('Anda yakin ingin menghapus buku ini?')) {
+                        $.ajax({
+                            url: 'http://127.0.0.1:8000/api/admin/books/' + id,
+                            type: 'DELETE',
+                            headers: {
+                                'Authorization': 'Bearer ' + token
+                            },
+                            success: function(response) {
+                                alert('Buku berhasil dihapus.');
+                                location.reload();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', status, error);
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.error('Failed to load books:', response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', status, error);
+            if (xhr.status === 401) {
+                alert('Unauthorized: Please login again.');
+                window.location.href = '/login.html';
+            }
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
+    
