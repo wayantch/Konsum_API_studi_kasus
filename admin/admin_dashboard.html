@@ -50,25 +50,72 @@
     <!-- Content -->
     <div id="content">
         <h1>Welcome to Admin Dashboard</h1>
-        <p>Selamat datang</p>
+        <p>Selamat datang, <span id="adminName"></span></p>
+        <div id="dashboardInfo">
+            <p>Jumlah Kategori: <span id="categoryCount">0</span></p>
+            <p>Jumlah Buku: <span id="bookCount">0</span></p>
+        </div>
     </div>
 
     <!-- Include jQuery and Bootstrap JS -->
-    <script>
-        $(document).ready(function() {
-    // Logout request
-    $('#logout').click(function() {
-        // Remove token from localStorage
-        localStorage.removeItem('token');
-        
-        // Redirect user to login page
-        window.location.href = '/login.html';
-    });
-});
-
-    </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="login.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Ambil informasi admin dan tampilkan
+            var adminName = localStorage.getItem('adminName');
+            if (adminName) {
+                $('#adminName').text(adminName);
+            }
+
+            // Ambil jumlah kategori
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/admin/categories/count',
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#categoryCount').text(response.data.count);
+                    } else {
+                        console.error('Gagal memuat jumlah kategori:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', status, error);
+                }
+            });
+
+            // Ambil jumlah buku
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/admin/books/count',
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#bookCount').text(response.data.count);
+                    } else {
+                        console.error('Gagal memuat jumlah buku:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', status, error);
+                }
+            });
+
+            // Fungsi logout
+            $('#logout').click(function() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminName');
+                window.location.href = '/login.html';
+            });
+        });
+    </script>
 </body>
 </html>

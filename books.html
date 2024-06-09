@@ -27,7 +27,7 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <button id="logout" class="btn btn-danger" onclick="return confirm('Are you sure you want to logout?')">Logout</button>
+                    <button id="logout" class="btn btn-danger" onclick="logout()">Logout</button>
                 </li>
             </ul>
         </div>
@@ -41,8 +41,18 @@
 
     <!-- Tambahkan Bootstrap JS dan jQuery -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
     <script>
+        // Fungsi logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Hapus token dari localStorage
+                localStorage.removeItem('token');
+                // Alihkan pengguna ke halaman login
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Script untuk mengambil data buku dan menampilkan dalam card
         $(document).ready(function(){
             // Panggil API untuk mendapatkan data buku
             $.getJSON("http://127.0.0.1:8000/api/books", function(data){
