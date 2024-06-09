@@ -33,45 +33,38 @@
         </div>
     </nav>
 
+    <div class="container mt-5">
+        <div class="row" id="bookRow">
+            <!-- Book cards will be appended here by jQuery -->
+        </div>
+    </div>
 
     <!-- Tambahkan Bootstrap JS dan jQuery -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="login.js"></script>
+
     <script>
-        $(document).ready(function () {
-            // Load existing books
-            $.ajax({
-                url: 'http://127.0.0.1:8000/api/admin/books',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        // Loop through each book and generate card
-                        $.each(response.data, function(index, book) {
-                            var card = '<div class="col-md-4 mb-4">' +
-                                            '<div class="card">' +
-                                                '<img src="http://127.0.0.1:8000/storage/' + book.image + '" class="card-img-top" alt="' + book.title + '">' +
-                                                '<div class="card-body">' +
-                                                    '<h5 class="card-title">' + book.title + '</h5>' +
-                                                    '<p class="card-text">' + book.author + '</p>' +
-                                                    '<p class="card-text">Publication Year: ' + book.publication_add + '</p>' +
-                                                    '<a href="#" class="btn btn-primary">Details</a>' +
-                                                '</div>' +
-                                            '</div>' +
-                                        '</div>';
-                            $('#bookRow').append(card);
-                        });
-                    } else {
-                        console.error('Failed to load books:', response.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', status, error);
-                    alert('Failed to load books. Please try again later.');
-                }
+        $(document).ready(function(){
+            // Panggil API untuk mendapatkan data buku
+            $.getJSON("http://127.0.0.1:8000/api/books", function(data){
+                // Loop melalui setiap buku
+                $.each(data.data, function(i, book){
+                    // Bangun card untuk setiap buku
+                    var card = '<div class="col-md-4 mb-4">';
+                    card += '<div class="card">';
+                    card += '<img src="' + book.image + '" class="card-img-top" alt="' + book.title + '">';
+                    card += '<div class="card-body">';
+                    card += '<h5 class="card-title">' + book.title + '</h5>';
+                    card += '<p class="card-text">Author: ' + book.author + '</p>';
+                    card += '<p class="card-text">Publication Year: ' + book.publication_add + '</p>';
+                    card += '</div>';
+                    card += '</div>';
+                    card += '</div>';
+
+                    // Apend card ke dalam elemen dengan id bookRow
+                    $("#bookRow").append(card);
+                });
             });
         });
     </script>
-    
 </body>
 </html>

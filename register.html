@@ -16,29 +16,75 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label for="registerName">Name:</label>
-                        <input type="text" class="form-control" id="registerName" name="registerName">
+                        <input type="text" class="form-control" id="registerName" name="registerName" required>
                     </div>
                     <div class="form-group">
                         <label for="registerEmail">Email:</label>
-                        <input type="text" class="form-control" id="registerEmail" name="registerEmail">
+                        <input type="email" class="form-control" id="registerEmail" name="registerEmail" required>
                     </div>
                     <div class="form-group">
                         <label for="registerPassword">Password:</label>
-                        <input type="password" class="form-control" id="registerPassword" name="registerPassword">
+                        <input type="password" class="form-control" id="registerPassword" name="registerPassword" required>
                     </div>
                     <div class="form-group">
                         <label for="registerConfirmPassword">Confirm Password:</label>
-                        <input type="password" class="form-control" id="registerConfirmPassword" name="registerConfirmPassword">
+                        <input type="password" class="form-control" id="registerConfirmPassword" name="registerConfirmPassword" required>
                     </div>
-                    <button id="register" class="btn btn-primary" type="button">Register</button>
+                    <button id="register" class="btn btn-primary" type="submit">Register</button>
                     <pre id="registerResult" class="mt-3"></pre>
                 </div>
             </div>
         </form>
     </div>
 
-    <script src="register.js"></script>
-    <script src="login.js"></script>
-    <!-- <script src="fetchData.js"></script> -->
+    <script>
+        $(document).ready(function () {
+            $('#registerForm').submit(function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Get form data
+                var name = $('#registerName').val();
+                var email = $('#registerEmail').val();
+                var password = $('#registerPassword').val();
+                var confirmPassword = $('#registerConfirmPassword').val();
+
+                // Validate form data
+                if (password !== confirmPassword) {
+                    $('#registerResult').text('Password and Confirm Password do not match.');
+                    return;
+                }
+
+                // Create data object
+                var data = {
+                    name: name,
+                    email: email,
+                    password: password,
+                    password_confirmation: confirmPassword
+                };
+
+                // AJAX request to register user
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/register', // API endpoint
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.success) {
+                            $('#registerResult').text('Registered successfully. ' + response.message);
+                            alert('Registered successfully. ' + response.message);
+                            window.location.href = 'login.html';
+                        } else {
+                            $('#registerResult').text('Failed to register: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', status, error);
+                        $('#registerResult').text('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
