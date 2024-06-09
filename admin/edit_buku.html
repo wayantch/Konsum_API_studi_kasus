@@ -12,25 +12,25 @@
         <h1>Edit Buku</h1>
         <form id="formEditBuku">
             <div class="form-group">
-                <label for="judul">Judul:</label>
-                <input type="text" class="form-control" id="judul" name="judul" required>
+                <label for="title">Judul:</label>
+                <input type="text" class="form-control" id="title" name="title" required>
             </div>
             <div class="form-group">
-                <label for="penulis">Penulis:</label>
-                <input type="text" class="form-control" id="penulis" name="penulis" required>
+                <label for="author">Penulis:</label>
+                <input type="text" class="form-control" id="author" name="author" required>
             </div>
             <div class="form-group">
-                <label for="tanggal_publikasi">Tanggal Publikasi:</label>
-                <input type="text" class="form-control" id="tanggal_publikasi" name="tanggal_publikasi" required>
+                <label for="publication_add">Tanggal Publikasi:</label>
+                <input type="text" class="form-control" id="publication_add" name="publication_add" required>
             </div>
             <div class="form-group">
-                <label for="gambar">Gambar:</label>
-                <input type="file" class="form-control-file" id="gambar" name="gambar">
+                <label for="image">Gambar:</label>
+                <input type="file" class="form-control" id="image" name="image" required>
             </div>
             <div class="form-group">
-                <label for="kategori">Kategori:</label>
-                <select class="form-control" id="kategori" name="kategori" required>
-                    <!-- Data kategori akan dimasukkan di sini oleh JavaScript -->
+                <label for="category">Kategori:</label>
+                <select class="form-control" id="category" name="category" required>
+                    <!-- Categories will be dynamically populated -->
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Simpan</button>
@@ -38,24 +38,25 @@
         </form>
     </div>
 
-    <!-- Include jQuery and Bootstrap JS -->
+    <!-- Include jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <!-- Include JavaScript for handling form submission -->
     <script>
-        $(document).ready(function () {
-            // Load existing book data
+        $(document).ready(function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var id = urlParams.get('id');
             var token = localStorage.getItem('token');
-            var bookId = getParameterByName('id'); // Function to get query parameter value from URL
-            if (!token || !bookId) {
-                alert('Token atau ID buku tidak ditemukan!');
+
+            if (!token) {
+                alert('Anda harus login terlebih dahulu!');
                 window.location.href = '/login.html';
                 return;
             }
 
-            // Load book data
+            // Fetch all categories
             $.ajax({
-                url: 'http://127.0.0.1:8000/api/admin/books/' + bookId,
+                url: 'http://127.0.0.1:8000/api/admin/categories',
                 type: 'GET',
                 dataType: 'json',
                 headers: {
@@ -63,15 +64,14 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        // Populate form fields with existing book data
-                        var book = response.data.book;
-                        $('#judul').val(book.title);
-                        $('#penulis').val(book.author);
-                        $('#tanggal_publikasi').val(book.publication_add);
-                        loadCategories(book.category_id);
+                        var categories = response.data;
+                        categories.forEach(function(category) {
+                            $('#category').append(new Option(category.name, category.id));
+                        });
+                        // Fetch book data after categories are loaded
+                        fetchBookData();
                     } else {
-                        console.error('Failed to load book details:', response.message);
-                        alert('Gagal memuat detail buku.');
+                        console.error('Failed to load categories:', response.message);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -79,19 +79,14 @@
                     if (xhr.status === 401) {
                         alert('Unauthorized: Please login again.');
                         window.location.href = '/login.html';
-                    } else if (xhr.status === 404) {
-                        alert('Buku tidak ditemukan.');
-                        window.location.href = '/admin_buku.html';
-                    } else {
-                        alert('Terjadi kesalahan. Silakan coba lagi.');
                     }
                 }
             });
 
-            // Load categories and set the selected category
-            function loadCategories(selectedCategoryId) {
+            // Fetch book data
+            function fetchBookData() {
                 $.ajax({
-                    url: 'http://127.0.0.1:8000/api/admin/categories',
+                    url: 'http://127.0.0.1:8000/api/admin/books/' + id,
                     type: 'GET',
                     dataType: 'json',
                     headers: {
@@ -99,70 +94,54 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            var categories = response.data;
-                            var categorySelect = $('#kategori');
-                            categorySelect.empty();
-                            categories.forEach(function(category) {
-                                var option = $('<option></option>')
-                                    .attr('value', category.id)
-                                    .text(category.name);
-                                if (category.id == selectedCategoryId) {
-                                    option.attr('selected', 'selected');
-                                }
-                                categorySelect.append(option);
-                            });
+                            var book = response.data.book;
+                            $('#title').val(book.title);
+                            $('#author').val(book.author);
+                            $('#publication_add').val(book.publication_add);
+                            $('#category').val(book.category_id);
                         } else {
-                            console.error('Failed to load categories:', response.message);
-                            alert('Gagal memuat kategori.');
+                            console.error('Failed to load book:', response.message);
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', status, error);
-                        alert('Terjadi kesalahan saat memuat kategori.');
+                        if (xhr.status === 401) {
+                            alert('Unauthorized: Please login again.');
+                            window.location.href = '/login.html';
+                        }
                     }
                 });
             }
 
-            // Function to extract query parameter from URL
-            function getParameterByName(name, url) {
-                if (!url) url = window.location.href;
-                name = name.replace(/[\[\]]/g, '\\$&');
-                var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                    results = regex.exec(url);
-                if (!results) return null;
-                if (!results[2]) return '';
-                return decodeURIComponent(results[2].replace(/\+/g, ' '));
-            }
-
-            // Form submission
+            // Update book data
             $('#formEditBuku').submit(function(event) {
-                event.preventDefault(); // Prevent the default form submission
+                event.preventDefault();
+                var formData = new FormData();
+                formData.append('title', $('#title').val());
+                formData.append('author', $('#author').val());
+                formData.append('publication_add', $('#publication_add').val());
+                formData.append('image', $('#image')[0].files[0]);
+                formData.append('category_id', $('#category').val());
 
-                // Get form data
-                var formData = new FormData(this);
-
-                // Send AJAX request to update book data
                 $.ajax({
-                    url: 'http://127.0.0.1:8000/api/admin/books/' + bookId,
-                    type: 'POST', // Changed to POST as required
+                    url: 'http://127.0.0.1:8000/api/admin/books/' + id,
+                    type: 'POST',
+                    processData: false,
+                    contentType: false,
                     data: formData,
                     headers: {
                         'Authorization': 'Bearer ' + token
                     },
-                    contentType: false,
-                    processData: false,
                     success: function(response) {
                         if (response.success) {
-                            alert('Data buku berhasil diperbarui.');
-                            window.location.href = '/admin_buku.html';
+                            alert('Buku berhasil diubah.');
+                            window.location.href = 'admin_buku.html';
                         } else {
                             console.error('Failed to update book:', response.message);
-                            alert('Gagal memperbarui data buku.');
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', status, error);
-                        alert('Terjadi kesalahan. Silakan coba lagi.');
                     }
                 });
             });
